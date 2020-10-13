@@ -18,16 +18,43 @@ public class BakerySystem
         this.foodList = foodList;
     }
 
+    public double calTotalCost(Order aOrder)
+    {
+        double totalCost = 0;
+        for (Map.Entry<FoodItem, Integer> entry : aOrder.getQuantity().entrySet()) {
+            for (FoodItem foodItem : foodList)
+            {
+                double currentPrice;
+                if (foodItem.equals(entry.getKey()))
+                {
+                    currentPrice = foodItem.getCurrentPrice();
+                    totalCost += entry.getValue() * currentPrice;
+                    break;
+                }
+            }
+        }
+        return totalCost;
+    }
+
     public void createNewOrder()
     {
         String itemName = "";
         int itemQuantity = 0;
-        String itemNumber = "";
         boolean nameCheck = true;
         boolean quantityCheck = true;
+        Order aOrder = new Order();
+        String option = "1";
         do {
-            UserInterface.displayCreateNewOrder();
-            Order aOrder = new Order();
+            if (option.equals("2"))
+            {
+                aOrder.getListOfItem().remove();
+                aOrder.getListOfQuantity().remove();
+                aOrder.getListOfPrice().remove();
+                aOrder.setTotalCost(calTotalCost(aOrder));
+            }
+            UserInterface.displayBakeShop();
+            displayCurrentItem(aOrder);
+            System.out.println("            Total cost:" + aOrder.getTotalCost());
             ArrayList<String> inventories = readFile("inventory.csv");
             for (String inventory : inventories) {
                 String[] i = inventory.split(",");
@@ -36,7 +63,7 @@ public class BakerySystem
             }
             do {
                 if (!nameCheck) {
-                    System.out.println("!Error: The item quantity is not valid!");
+                    System.out.println("!Error: The item name is not valid!");
                     System.out.println("****************************************\n" +
                             "Please try enter the item name again.");
                 }
@@ -46,17 +73,68 @@ public class BakerySystem
                 itemName = console.nextLine();
                 nameCheck = validateNameCheck(itemName);
             } while (!nameCheck);
-
+            String itemNumber = "";
+            FoodItem aFoodItem = new FoodItem();
+            for (FoodItem foodItem : foodList)
+            {
+                if (foodItem.getFoodItemName().equals(itemName))
+                {
+                    aFoodItem = foodItem;
+                    itemNumber = aFoodItem.getItemNumber();
+                    break;
+                }
+            }
             do {
-                if (!quantityCheck)
-                    System.out.println("!Error: The item name is not valid!");
-                System.out.println("-- Please enter the item's quantity:");
+                if (!quantityCheck) {
+                    System.out.println("!Error: The item quantity is not valid!");
+                    System.out.println("****************************************\n" +
+                            "Please try enter the item quantity again.");
+                }
+                else
+                    System.out.println("-- Please enter the item's quantity:");
                 Scanner console = new Scanner(System.in);
                 String s = console.nextLine();
-                quantityCheck = validateQuantiiyCheck(itemName, s);
-                itemQuantity = Integer.parseInt(s);
+                quantityCheck = validateQuantityCheck(itemNumber, s);
+                if (quantityCheck == true)
+                {
+                    itemQuantity = Integer.parseInt(s);
+                }
             } while (!quantityCheck);
-        } while (true);
+            int currentItemQuantity = 0;
+            int finalItemQuantity = 0;
+            for (FoodItem key : aOrder.getQuantity().keySet())
+            {
+                if (key.getFoodItemName().equals(itemName)) {
+                    currentItemQuantity = aOrder.getQuantity().get(key);
+                }
+            }
+            finalItemQuantity = currentItemQuantity + itemQuantity;
+            aOrder.getQuantity().put(aFoodItem,finalItemQuantity);
+            aOrder.setTotalCost(calTotalCost(aOrder));
+            option = UserInterface.displayCreateOrderOption();
+
+        } while (option.equals("1") || option.equals("2"));
+    }
+
+    public void displayCurrentItem(Order aOrder)
+    {
+        System.out.println("Id    " + "Name               " + "Quantity " + "Cost");
+        for (Map.Entry<FoodItem, Integer> entry : aOrder.getQuantity().entrySet()) {
+            System.out.println("key = " + entry.getKey() + ", value = " + entry.getValue());
+            System.out.printf("%-6s", entry.getKey().getItemNumber());
+            System.out.printf("%-19s", entry.getKey().getFoodItemName());
+            System.out.printf("%-9s",entry.getValue());
+            System.out.print(aOrder.getListOfPrice().get(i));
+            System.out.println();
+        }
+        for (int i = 0; i < length; i++)
+        {
+            System.out.printf("%-6s", aOrder.getListOfItem().get(i).getItemNumber());
+            System.out.printf("%-19s", aOrder.getListOfItem().get(i).getFoodItemName());
+            System.out.printf("%-9s",aOrder.getListOfQuantity().get(i));
+            System.out.print(aOrder.getListOfPrice().get(i));
+            System.out.println();
+        }
     }
 
     public Bakery getBakery()
@@ -129,19 +207,19 @@ public class BakerySystem
         return false;
     }
 
-    public boolean validateQuantiiyCheck(String itemName, String s)
+    public boolean validateQuantityCheck(String itemNumber, String s)
     {
         boolean check = false;
         for (int j = 0; j < s.length(); j++)
         {
             if (!(s.charAt(j) >= 48 && s.charAt(j) <= 57))
             {
-                check = true;
+                check = false;
                 break;
             }
             else
             {
-                check = false;
+                check = true;
             }
         }
         if (check)
@@ -152,17 +230,8 @@ public class BakerySystem
         if (!check)
             return false;
         else {
-            String itemId = "";
-            for (FoodItem foodItem : foodList)
-            {
-                if (foodItem.getFoodItemName().equals(itemName))
-                {
-                    itemId = foodItem.getItemNumber();
-                    break;
-                }
-            }
             for (Inventory inventory : bakery.getListOfStore().get(0).getListOfInventory()) {
-                if (itemId.equals(inventory.getItemNumber())) {
+                if (itemNumber.equals(inventory.getItemNumber())) {
                     int currentNumber = inventory.getQuantity();
                     if (Integer.parseInt(s) <= currentNumber)
                         return true;
