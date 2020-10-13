@@ -97,7 +97,6 @@ public class UserInterface {
         check = bakerySystem.login();
         while (!check)
         {
-            displayLoginScreen();
             displayLoginError();
             check = bakerySystem.login();
         }

@@ -1,6 +1,7 @@
 import java.util.*;
 
 public class Bakery {
+
     private ArrayList<Store> listOfStore;
 
     public Bakery()
