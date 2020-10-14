@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.Scanner;
 
 public class UserInterface {
@@ -82,8 +83,7 @@ public class UserInterface {
                 "Please try login again.or contact the owner to reset the password.");
     }
 
-    public static void main(String[] args)
-    {
+    public static void main(String[] args){
         BakerySystem bakerySystem = new BakerySystem();
         boolean check;
         displayBakeShop();

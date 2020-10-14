@@ -1,5 +1,8 @@
 import java.io.*;
+import java.lang.reflect.Array;
+import java.text.SimpleDateFormat;
 import java.util.*;
+
 
 public class BakerySystem
 {
@@ -16,6 +19,50 @@ public class BakerySystem
     {
         this.bakery = bakery;
         this.foodList = foodList;
+    }
+
+
+    public void addOrderInDB(Order aOrder){
+        BufferedWriter out = null;
+        try
+        {
+            ArrayList<String> itemName= new ArrayList<>();
+            ArrayList<String> itemPrice = new ArrayList<>();
+            ArrayList<String> itemQuantity = new ArrayList<>();
+            for (Map.Entry<FoodItem, Integer> entry : aOrder.getQuantity().entrySet()) {
+                itemName.add(entry.getKey().getFoodItemName());
+                itemPrice.add(String.valueOf(entry.getKey().getCurrentPrice()));
+                itemQuantity.add(String.valueOf(entry.getValue()));
+            }
+            String n = "";
+            String q = "";
+            String p = "";
+            int length = itemName.size();
+            for (int i = 0; i < length; i ++)
+            {
+                if (i == length - 1)
+                {
+                    n += itemName.get(i);
+                    q += itemQuantity.get(i);
+                    p += itemPrice.get(i);
+                }
+                else {
+                    n += itemName.get(i) + "|";
+                    q += itemQuantity.get(i) + "|";
+                    p += itemPrice.get(i) + "|";
+                }
+            }
+            out = new BufferedWriter(new FileWriter("order.csv", true));
+            out.write(bakery.getListOfStore().get(0).getStoreId() + "," + aOrder.getOrderId() + "," +
+                    bakery.getListOfStore().get(0).getListOfUser().get(0).getUserId() + "," + n + "," + q + ","+ p + "," +
+                    aOrder.getTotalCost() + "," + aOrder.getOrderDate() + "," + aOrder.getOrderTime() + "," +
+                    aOrder.getNameOfCustomer() + "," + aOrder.getOrderStatus() + "," + aOrder.getCustomerPhone() + "," +
+                    aOrder.getLastModifiedBy() +
+                    "," + aOrder.getOrderDate() + "," + aOrder.getOrderTime() + "\n");
+            out.close();
+        } catch (IOException e) {
+            System.out.println("Unexpected I/O exception occur");
+        }
     }
 
     public double calTotalCost(Order aOrder)
@@ -36,8 +83,7 @@ public class BakerySystem
         return totalCost;
     }
 
-    public void createNewOrder()
-    {
+    public void createNewOrder() {
         String itemName = "";
         int itemQuantity = 0;
         boolean nameCheck = true;
@@ -131,19 +177,36 @@ public class BakerySystem
 
         if (option.equals("3"))
         {
-            bakery.getListOfStore().get(0).getListOfOrder().add(aOrder);
             Scanner console = new Scanner(System.in);
             System.out.println("--  Enter the name of the customer:");
             String name = console.nextLine();
             UserInterface.displayBakeShop();
+            String date = getDate();
+            String time = getTime();
+            aOrder.setOrderDate(date);
+            aOrder.setOrderTime(time);
+            aOrder.setLastModifiedBy(String.valueOf(bakery.getListOfStore().get(0).getListOfUser().get(0).getUserId()));
+            aOrder.setLastModifiedDate(date);
+            aOrder.setLastModifiedTime(time);
+            aOrder.setLastModifiedBy(String.valueOf(bakery.getListOfStore().get(0).getListOfUser().get(0).getUserId()));
+            aOrder.setOrderStatus("Confirmed");
+            aOrder.setNameOfCustomer(name);
+            bakery.getListOfStore().get(0).getListOfOrder().add(aOrder);
+            String orderId = createOrderId(aOrder);
+            aOrder.setOrderId(orderId);
             displayCurrentItem(aOrder);
+            addOrderInDB(aOrder);
             System.out.println("            Total cost:" + aOrder.getTotalCost());
-            System.out.println("            Customer Name:" + name);
+            System.out.println("****************************************");
+            System.out.println("Order id: " + orderId);
+            System.out.println("Order date: " + date);
+            System.out.println("Order time: " + time);
+            System.out.println("Store id: " + bakery.getListOfStore().get(0).getStoreId());
+            System.out.println("Employee id: " + bakery.getListOfStore().get(0).getListOfUser().get(0).getUserId());
+            System.out.println("Customer name: " + name);
+            System.out.println("****************************************");
             System.out.println("The order has been successfully created! ");
-
         }
-
-
         String currentUser = bakery.getListOfStore().get(0).getListOfUser().get(0).getUserName();
         String currentUserType = bakery.getListOfStore().get(0).getListOfUser().get(0).getUserType();
         UserInterface.displayHomeScreen(currentUser, currentUserType);
@@ -151,11 +214,31 @@ public class BakerySystem
 
     }
 
+    public String createOrderId(Order aOrder)
+    {
+        ArrayList<String> orders = readFile("order.csv");
+        int biggest = 0;
+        for (String order : orders)
+        {
+            String[] o = order.split(",");
+            String orderID = o[1];
+            String[] subOrderId = orderID.split("-");
+            int idNumber = Integer.parseInt(subOrderId[0]);
+            if (idNumber > biggest)
+                biggest = idNumber;
+        }
+        int currentIdNumber = biggest + 1;
+        String str = String.format("%06d", currentIdNumber);
+        String year = aOrder.getOrderDate().split("-")[0];
+        String month = aOrder.getOrderDate().split("-")[1];
+        String orderId = str + "-" + month + year;
+        return orderId;
+    }
+
     public void displayCurrentItem(Order aOrder)
     {
         System.out.println("Id    " + "Name               " + "Quantity " + "Cost");
         for (Map.Entry<FoodItem, Integer> entry : aOrder.getQuantity().entrySet()) {
-            System.out.println("key = " + entry.getKey() + ", value = " + entry.getValue());
             System.out.printf("%-6s", entry.getKey().getItemNumber());
             System.out.printf("%-19s", entry.getKey().getFoodItemName());
             System.out.printf("%-9s",entry.getValue());
@@ -169,9 +252,50 @@ public class BakerySystem
         return bakery;
     }
 
+    public String getDate(){
+        Date date = new Date();
+        SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
+        String date1 = sf.format(date);
+        return date1;
+    }
+
     public ArrayList<FoodItem> getFoodList()
     {
         return foodList;
+    }
+
+    public String getTime(){
+        Date time = new Date();
+        SimpleDateFormat sf = new SimpleDateFormat("HH:mm:ss");
+        String time1 = sf.format(time);
+        return time1;
+    }
+
+    public void initializeFoodItem()
+    {
+        ArrayList<String> foodItems = readFile("foodItem.csv");
+        for (String foodItem : foodItems)
+        {
+            String[] f = foodItem.split(",");
+            FoodItem aFoodItem = new FoodItem();
+            aFoodItem.setItemNumber(f[0]);
+            aFoodItem.setFoodItemName(f[1]);
+            aFoodItem.setFoodType(f[2]);
+            aFoodItem.setCurrentPrice(Double.parseDouble(f[3]));
+            foodList.add(aFoodItem);
+        }
+    }
+
+    public boolean isNumeric(String s)
+    {
+        for (int j = 0; j < s.length(); j++)
+        {
+            if (!(s.charAt(j) >= 48 && s.charAt(j) <= 57))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     public boolean login()
@@ -199,8 +323,7 @@ public class BakerySystem
         UserInterface.main(args);
     }
 
-    public void mainOption(String currentUserType)
-    {
+    public void mainOption(String currentUserType) {
         if (currentUserType.equals("Manager"))
         {
             Scanner console = new Scanner(System.in);
@@ -237,37 +360,24 @@ public class BakerySystem
     public boolean validateQuantityCheck(String itemNumber, String s)
     {
         boolean check = false;
-        for (int j = 0; j < s.length(); j++)
-        {
-            if (!(s.charAt(j) >= 48 && s.charAt(j) <= 57))
-            {
-                check = false;
-                break;
-            }
-            else
-            {
-                check = true;
-            }
-        }
+        check = isNumeric(s);
         if (check)
         {
             if (Integer.parseInt(s) <= 0)
                 check = false;
         }
-        if (!check)
+        else
             return false;
-        else {
-            for (Inventory inventory : bakery.getListOfStore().get(0).getListOfInventory()) {
-                if (itemNumber.equals(inventory.getItemNumber())) {
-                    int currentNumber = inventory.getQuantity();
-                    if (Integer.parseInt(s) <= currentNumber)
-                        return true;
-                    else
-                        return false;
-                }
+        for (Inventory inventory : bakery.getListOfStore().get(0).getListOfInventory()) {
+            if (itemNumber.equals(inventory.getItemNumber())) {
+                int currentNumber = inventory.getQuantity();
+                if (Integer.parseInt(s) <= currentNumber)
+                    return true;
+                else
+                    return false;
             }
-            return false;
         }
+        return false;
     }
 
     public boolean validateUser(String account, String password)
@@ -280,7 +390,7 @@ public class BakerySystem
                     && u[3].equals(password))
             {
                 int userId = Integer.parseInt(u[0]);
-                User aUser = new User(userId,u[1],u[2],u[3],u[4],u[5],u[6],u[7],u[8],u[9]);
+                User aUser = new User(userId,u[1],u[2],u[3],u[4],u[5],u[6],u[7],u[8]);
                 ArrayList<String> stores = readFile("store.csv");
                 for (String store : stores)
                 {
@@ -292,31 +402,18 @@ public class BakerySystem
                         aStore.setStoreId(s[0]);
                         aStore.setStoreAddress(s[1]);
                         aStore.setStoreContactNumber(s[2]);
-                        ArrayList<User> userList = new ArrayList<User>();
+                        ArrayList<User> userList = new ArrayList<>();
                         userList.add(aUser);
                         aStore.setListOfUser(userList);
-                        ArrayList<Store> storeList = new ArrayList<Store>();
+                        ArrayList<Store> storeList = new ArrayList<>();
                         storeList.add(aStore);
                         bakery.setListOfStore(storeList);
                         break;
                     }
                 }
-                ArrayList<String> foodItems = readFile("foodItem.csv");
-                for (String foodItem : foodItems)
-                {
-                    String[] f = foodItem.split(",");
-                    FoodItem aFoodItem = new FoodItem();
-                    aFoodItem.setItemNumber(f[0]);
-                    aFoodItem.setFoodItemName(f[1]);
-                    aFoodItem.setFoodType(f[2]);
-                    aFoodItem.setCurrentPrice(Double.parseDouble(f[3]));
-                    foodList.add(aFoodItem);
-                }
-
+                initializeFoodItem();
                 return true;
             }
-
-
         }
         return false;
     }

@@ -6,6 +6,7 @@ import java.util.*;
 public class Order
 {
     private String orderDate;
+    private String orderId;
     private String orderTime;
     private String orderStatus;
     private Map<FoodItem,Integer> quantity;
@@ -13,13 +14,16 @@ public class Order
     private String lastModifiedDate;
     private String lastModifiedTime;
     private String nameOfCustomer;
+    private String customerPhone;
     private String lastModifiedBy;
 
+
     public Order(){
+        this.customerPhone = "";
         this.orderDate = "";
         this.orderTime = "";
         this.orderStatus = "";
-        this.quantity = new HashMap<FoodItem,Integer>();
+        this.quantity = new HashMap<>();
         this.totalCost = 0;
         this.lastModifiedDate = "";
         this.lastModifiedTime = "";
@@ -27,9 +31,12 @@ public class Order
         this.lastModifiedBy = "";
     }
 
-    public Order(String orderDate, String orderTime, String orderStatus, Map<FoodItem,Integer> quantity, double totalCost,
-                 String lastModifiedDate, String lastModifiedTime, String nameOfCustomer, String lastModifiedBy) {
+    public Order(String customerPhone, String orderDate, String orderId, String orderTime, String orderStatus, Map<FoodItem,
+            Integer> quantity, double totalCost, String lastModifiedDate, String lastModifiedTime,
+                 String nameOfCustomer, String lastModifiedBy) {
+        this.customerPhone = customerPhone;
         this.orderDate = orderDate;
+        this.orderId = orderId;
         this.orderTime = orderTime;
         this.orderStatus = orderStatus;
         this.quantity = quantity;
@@ -40,8 +47,16 @@ public class Order
         this.lastModifiedBy = lastModifiedBy;
     }
 
+    public String getCustomerPhone() {
+        return customerPhone;
+    }
+
     public String getOrderDate() {
         return orderDate;
+    }
+
+    public String getOrderId() {
+        return orderId;
     }
 
     public String getOrderTime() {
@@ -76,8 +91,16 @@ public class Order
         return lastModifiedBy;
     }
 
+    public void setCustomerPhone(String customerPhone) {
+        this.customerPhone = customerPhone;
+    }
+
     public void setOrderDate(String orderDate) {
         this.orderDate = orderDate;
+    }
+
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
     }
 
     public void setOrderTime(String orderTime) {

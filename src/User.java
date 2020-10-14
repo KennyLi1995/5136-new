@@ -9,7 +9,6 @@ public class User {
     protected String userContactNumber;
     protected String userType;
     protected String userStatus;
-    protected String storeId;
 
     public User()
     {
@@ -22,12 +21,11 @@ public class User {
         this.userContactNumber = "";
         this.userType = "";
         this.userStatus = "";
-        this.storeId = "";
     }
 
     public User(int userId, String userName, String userEmail, String userPassword,
                 String employeeTaxFileNumber, String employeeResidentialAddress,
-                String userContactNumber, String userType, String userStatus, String storeId)
+                String userContactNumber, String userType, String userStatus)
     {
         this.userId = userId;
         this.userName = userName;
@@ -38,7 +36,6 @@ public class User {
         this.userContactNumber = userContactNumber;
         this.userType = userType;
         this.userStatus = userStatus;
-        this.storeId = storeId;
     }
 
     public int getUserId()
@@ -86,11 +83,6 @@ public class User {
         return userStatus;
     }
 
-    public String getStoreId()
-    {
-        return storeId;
-    }
-
     public void setUserId(int userId)
     {
         this.userId = userId;
@@ -136,8 +128,4 @@ public class User {
         this.userStatus = userStatus;
     }
 
-    public void setStoreId(String storeId)
-    {
-        this.storeId = storeId;
-    }
 }
