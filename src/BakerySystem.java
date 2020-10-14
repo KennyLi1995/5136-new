@@ -45,13 +45,6 @@ public class BakerySystem
         Order aOrder = new Order();
         String option = "1";
         do {
-            if (option.equals("2"))
-            {
-                aOrder.getListOfItem().remove();
-                aOrder.getListOfQuantity().remove();
-                aOrder.getListOfPrice().remove();
-                aOrder.setTotalCost(calTotalCost(aOrder));
-            }
             UserInterface.displayBakeShop();
             displayCurrentItem(aOrder);
             System.out.println("            Total cost:" + aOrder.getTotalCost());
@@ -111,9 +104,51 @@ public class BakerySystem
             finalItemQuantity = currentItemQuantity + itemQuantity;
             aOrder.getQuantity().put(aFoodItem,finalItemQuantity);
             aOrder.setTotalCost(calTotalCost(aOrder));
+
+            UserInterface.displayBakeShop();
+            displayCurrentItem(aOrder);
+            System.out.println("            Total cost:" + aOrder.getTotalCost());
             option = UserInterface.displayCreateOrderOption();
+            if (option.equals("2"))
+            {
+                System.out.println("--  Enter the name of the item you want to cancel:");
+                Scanner console = new Scanner(System.in);
+                String name = console.nextLine();
+                for (Map.Entry<FoodItem, Integer> entry : aOrder.getQuantity().entrySet()) {
+                    for (FoodItem foodItem : foodList)
+                    {
+                        if (name.equals(entry.getKey().getFoodItemName()))
+                        {
+                            aOrder.getQuantity().remove(foodItem);
+                            break;
+                        }
+                    }
+                }
+                aOrder.setTotalCost(calTotalCost(aOrder));
+            }
 
         } while (option.equals("1") || option.equals("2"));
+
+        if (option.equals("3"))
+        {
+            bakery.getListOfStore().get(0).getListOfOrder().add(aOrder);
+            Scanner console = new Scanner(System.in);
+            System.out.println("--  Enter the name of the customer:");
+            String name = console.nextLine();
+            UserInterface.displayBakeShop();
+            displayCurrentItem(aOrder);
+            System.out.println("            Total cost:" + aOrder.getTotalCost());
+            System.out.println("            Customer Name:" + name);
+            System.out.println("The order has been successfully created! ");
+
+        }
+
+
+        String currentUser = bakery.getListOfStore().get(0).getListOfUser().get(0).getUserName();
+        String currentUserType = bakery.getListOfStore().get(0).getListOfUser().get(0).getUserType();
+        UserInterface.displayHomeScreen(currentUser, currentUserType);
+        mainOption(currentUserType);
+
     }
 
     public void displayCurrentItem(Order aOrder)
@@ -124,15 +159,7 @@ public class BakerySystem
             System.out.printf("%-6s", entry.getKey().getItemNumber());
             System.out.printf("%-19s", entry.getKey().getFoodItemName());
             System.out.printf("%-9s",entry.getValue());
-            System.out.print(aOrder.getListOfPrice().get(i));
-            System.out.println();
-        }
-        for (int i = 0; i < length; i++)
-        {
-            System.out.printf("%-6s", aOrder.getListOfItem().get(i).getItemNumber());
-            System.out.printf("%-19s", aOrder.getListOfItem().get(i).getFoodItemName());
-            System.out.printf("%-9s",aOrder.getListOfQuantity().get(i));
-            System.out.print(aOrder.getListOfPrice().get(i));
+            System.out.print(entry.getKey().getCurrentPrice());
             System.out.println();
         }
     }

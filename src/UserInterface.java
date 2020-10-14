@@ -18,7 +18,7 @@ public class UserInterface {
             System.out.println("****************************************\n" +
                     "-- Please select one option by entering the number:\n" +
                     "1. Continue entering items\n" +
-                    "2. Cancel the last item\n" +
+                    "2. Cancel items\n" +
                     "3. Confirm\n" +
                     "4. Back to home screen");
             Scanner console = new Scanner(System.in);
