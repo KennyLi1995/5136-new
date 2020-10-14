@@ -58,7 +58,7 @@ public class BakerySystem
                     aOrder.getTotalCost() + "," + aOrder.getOrderDate() + "," + aOrder.getOrderTime() + "," +
                     aOrder.getNameOfCustomer() + "," + aOrder.getOrderStatus() + "," + aOrder.getCustomerPhone() + "," +
                     aOrder.getLastModifiedBy() +
-                    "," + aOrder.getOrderDate() + "," + aOrder.getOrderTime() + "\n");
+                    "," + aOrder.getLastModifiedDate() + "," + aOrder.getLastModifiedTime() + "\n");
             out.close();
         } catch (IOException e) {
             System.out.println("Unexpected I/O exception occur");
@@ -335,12 +335,39 @@ public class BakerySystem
         }
     }
 
-    public boolean validateNameCheck(String itemName)
+    public ArrayList<String> searchItems(String s)
     {
-        String itemId = "";
+        ArrayList<String> items = new ArrayList<>();
+        s = s.strip();
         for (FoodItem foodItem : foodList)
         {
-            if (foodItem.getFoodItemName().equals(itemName))
+            if (foodItem.getFoodItemName().strip().equals(s))
+            {
+                s = foodItem.getItemNumber();
+                items.add(s);
+            }
+        }
+        return items;
+    }
+
+    public void setBakery(Bakery bakery)
+    {
+        this.bakery = bakery;
+    }
+
+    public void setFoodList(ArrayList<FoodItem> foodList)
+    {
+        this.foodList = foodList;
+    }
+
+    public boolean validateNameCheck(String itemName)
+    {
+        itemName = itemName.strip();
+        String itemId = "";
+        //
+        for (FoodItem foodItem : foodList)
+        {
+            if (foodItem.getFoodItemName().strip().equals(itemName))
             {
                 itemId = foodItem.getItemNumber();
                 break;
@@ -452,13 +479,4 @@ public class BakerySystem
         return strings;
     }
 
-    public void setBakery(Bakery bakery)
-    {
-        this.bakery = bakery;
-    }
-
-    public void setFoodList(ArrayList<FoodItem> foodList)
-    {
-        this.foodList = foodList;
-    }
 }
