@@ -1,6 +1,12 @@
+package utils;
+
 import java.util.Scanner;
 
-public class UserInterface {
+public class BakeryUtils {
+
+	private BakeryUtils() {
+		super();
+	}
 
 	public static void displayBakeShop() {
 		System.out.println("=======================================");
@@ -31,7 +37,7 @@ public class UserInterface {
 		displayBakeShop();
 		System.out.println(" *****Welcome, " + userName + "(" + userType + ")*****");
 		switch (userType) {
-		case "Staff" -> {
+		case "Staff":
 			System.out.println("-- Please select one option by entering the number:");
 			System.out.println("1. Create new order");
 			System.out.println("2. Create new special order for roast coffee bean");
@@ -39,8 +45,8 @@ public class UserInterface {
 			System.out.println("4. Manage inventory");
 			System.out.println("5. View my profile");
 			System.out.println("0. Logout");
-		}
-		case "Manager" -> {
+			break;
+		case "Manager":
 			System.out.println("-- Please select one option by entering the number:");
 			System.out.println("1. Create new order");
 			System.out.println("2. Create new special order for roast coffee bean");
@@ -49,8 +55,8 @@ public class UserInterface {
 			System.out.println("5. Manage all advance order");
 			System.out.println("6. View my profile");
 			System.out.println("0. Logout");
-		}
-		case "Owner" -> {
+			break;
+		case "Owner":
 			System.out.println("-- Please select one option by entering the number:");
 			System.out.println("1. Create new order");
 			System.out.println("2. Create new special order for roast coffee bean");
@@ -62,12 +68,11 @@ public class UserInterface {
 			System.out.println("8. Track my business");
 			System.out.println("9. View my profile");
 			System.out.println("0. Logout");
-		}
-		default -> {
+			break;
+		default:
 			System.out.println("-- Please select one option by entering the number:");
 			System.out.println("!Error: User Type is not valid!");
 			System.out.println("0. Logout");
-		}
 		}
 
 	}
@@ -76,23 +81,6 @@ public class UserInterface {
 		System.out.println("!Error: User is not valid!");
 		System.out.println("****************************************\n"
 				+ "Please try login again.or contact the owner to reset the password.");
-	}
-
-	public static void main(String args[]) {
-		while (true) {
-			BakerySystem bakerySystem = new BakerySystem();
-			boolean check;
-			displayBakeShop();
-			System.out.println("***Please enter your user credential***");
-			check = bakerySystem.login();
-			while (!check) {
-				displayLoginError();
-				check = bakerySystem.login();
-			}
-			User currentUser = bakerySystem.getBakery().getListOfStore().get(0).getListOfUser().get(0);
-			bakerySystem.mainOption(currentUser);
-		}
-
 	}
 
 }
