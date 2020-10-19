@@ -5,7 +5,7 @@ import model.Store;
 
 public class ReportUtils {
 
-	public void displayReportTitle(Report report, Store store) {
+	public static void displayReportTitle(Report report, Store store) {
 		BakeryUtils.displayBakeShop();
 		System.out.println("Report: ");
 		System.out.println("dateOfReport: " + report.getDateOfReport());

@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -20,8 +21,15 @@ import model.Order;
 import model.Store;
 import model.User;
 import utils.BakeryUtils;
+import utils.FileUtils;
 
 public class BakeryService {
+
+	private OptionService optionService;
+
+	public BakeryService(OptionService optionService) {
+		this.optionService = optionService;
+	}
 
 	public void addOrderInDB(Order aOrder, Bakery bakery) {
 		BufferedWriter out = null;
@@ -93,7 +101,7 @@ public class BakeryService {
 			BakeryUtils.displayBakeShop();
 			displayCurrentItem(aOrder);
 			System.out.println("            Total cost:" + aOrder.getTotalCost());
-			ArrayList<String> inventories = readFile("inventory.csv");
+			List<String> inventories = FileUtils.readFile("inventory.csv");
 			bakerySystem.getBakery().getListOfStore().get(0).getListOfInventory().clear();
 			for (String inventory : inventories) {
 				String[] i = inventory.split(",");
@@ -200,7 +208,7 @@ public class BakeryService {
 	}
 
 	public String createOrderId(Order aOrder) {
-		ArrayList<String> orders = readFile("order.csv");
+		List<String> orders = FileUtils.readFile("order.csv");
 		int biggest = 0;
 		for (String order : orders) {
 			String[] o = order.split(",");
@@ -246,95 +254,6 @@ public class BakeryService {
 		return 0;
 	}
 
-	public void initializeFoodItem(BakerySystem bakerySystem) {
-		ArrayList<String> foodItems = readFile("foodItem.csv");
-		for (String foodItem : foodItems) {
-			String[] f = foodItem.split(",");
-			FoodItem aFoodItem = new FoodItem();
-			aFoodItem.setItemNumber(f[0]);
-			aFoodItem.setFoodItemName(f[1]);
-			aFoodItem.setFoodType(f[2]);
-			aFoodItem.setCurrentPrice(Double.parseDouble(f[3]));
-			bakerySystem.getFoodList().add(aFoodItem);
-		}
-	}
-
-	public boolean isNumeric(String s) {
-		for (int j = 0; j < s.length(); j++) {
-			if (!(s.charAt(j) >= 48 && s.charAt(j) <= 57)) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	public boolean login(BakerySystem bakerySystem) {
-		Scanner console = new Scanner(System.in);
-		System.out.println("--Enter your employee id or email:");
-		System.out.println("--Enter your password:");
-		String account = console.nextLine();
-		System.out.println("--Enter your employee id or email:" + account);
-		System.out.println("--Enter your password:");
-		String password = console.nextLine();
-		System.out.println("--Enter your employee id or email:" + account);
-		System.out.println("--Enter your password:" + password);
-
-		if (validateUser(account, password, bakerySystem))
-			return true;
-		else
-			return false;
-
-	}
-
-	public void mainOption(User currentUser, BakerySystem bakerySystem) {
-		boolean isContinue = true;
-		Scanner console = new Scanner(System.in);
-		String currentUserName = currentUser.getUserName();
-		String currentUserType = currentUser.getUserType();
-		while (isContinue) {
-			BakeryUtils.displayHomeScreen(currentUserName, currentUserType);
-			String selection = console.nextLine();
-			if (currentUserType.equals("Staff") || currentUserType.equals("Manager")) {
-				switch (selection) {
-				case "1":
-					createNewOrder(bakerySystem);
-					break;
-				case "0":
-					isContinue = false;
-					break;
-				default:
-					System.out.println("!Error: Your selection is not valid!");
-					System.out.println(
-							"****************************************\n" + "Please select the correct option.");
-				}
-			} else if (currentUserType.equals("Owner")) {
-				switch (selection) {
-				case "1":
-					createNewOrder(bakerySystem);
-					break;
-				case "0":
-					isContinue = false;
-					break;
-				default:
-					System.out.println("!Error: Your selection is not valid!");
-					System.out.println(
-							"****************************************\n" + "Please select the correct option.");
-				}
-			} else {
-				switch (selection) {
-				case "0":
-					isContinue = false;
-					break;
-				default:
-					System.out.println("!Error: Your selection is not valid!");
-					System.out.println(
-							"****************************************\n" + "Please select the correct option.");
-				}
-			}
-		}
-
-	}
-
 	public ArrayList<FoodItem> searchItems(String s, BakerySystem bakerySystem) {
 		ArrayList<FoodItem> items = new ArrayList<>();
 		s = s.strip();
@@ -363,7 +282,7 @@ public class BakeryService {
 			Scanner console = new Scanner(System.in);
 			selection = console.nextLine();
 			selection = selection.strip();
-			if (isNumeric(selection) && Integer.parseInt(selection) > index) {
+			if (BakeryUtils.isNumeric(selection) && Integer.parseInt(selection) > index) {
 				System.out.println("!Error: Your selection is not valid!");
 				System.out
 						.println("****************************************\n" + "Please try selecting a option again.");
@@ -374,7 +293,7 @@ public class BakeryService {
 	}
 
 	public void updateInventory(Order aOrder, Bakery bakery) {
-		ArrayList<String> inventories = readFile("inventory.csv");
+		List<String> inventories = FileUtils.readFile("inventory.csv");
 		bakery.getListOfStore().get(0).getListOfInventory().clear();
 		for (String inventory : inventories) {
 			String[] i = inventory.split(",");
@@ -435,7 +354,7 @@ public class BakeryService {
 
 	public boolean validateQuantityCheck(String itemNumber, String s, Bakery bakery) {
 		boolean check = false;
-		check = isNumeric(s);
+		check = BakeryUtils.isNumeric(s);
 		if (check) {
 			if (Integer.parseInt(s) <= 0)
 				check = false;
@@ -453,61 +372,34 @@ public class BakeryService {
 		return false;
 	}
 
-	public boolean validateUser(String account, String password, BakerySystem bakerySystem) {
-		ArrayList<String> users = readFile("user.csv");
-		for (String user : users) {
-			String[] u = user.split(",");
-			if ((Integer.parseInt(u[0]) == Integer.parseInt(account) || u[2].equals(account))
-					&& u[3].equals(password)) {
-				int userId = Integer.parseInt(u[0]);
-				User aUser = new User(userId, u[1], u[2], u[3], u[4], u[5], u[6], u[7], u[8]);
-				ArrayList<String> stores = readFile("store.csv");
-				for (String store : stores) {
-
-					String[] s = store.split(",");
-					if (s[0].equals(u[9])) {
-						Store aStore = new Store();
-						aStore.setStoreId(s[0]);
-						aStore.setStoreAddress(s[1]);
-						aStore.setStoreContactNumber(s[2]);
-						ArrayList<User> userList = new ArrayList<>();
-						userList.add(aUser);
-						aStore.setListOfUser(userList);
-						ArrayList<Store> storeList = new ArrayList<>();
-						storeList.add(aStore);
-						bakerySystem.getBakery().setListOfStore(storeList);
-						break;
-					}
-				}
-				initializeFoodItem(bakerySystem);
-				return true;
+	public Store chooseStore(Bakery bakery){
+		System.out.println("Please enter the number of store you want to check: ");
+		Scanner sc = new Scanner(System.in);
+		String storeChose = sc.nextLine();
+		boolean isNumeric;
+		do {
+			isNumeric = true;
+			if (storeChose.length() == 0){
+				System.out.println("The storeID cannot be blank");
+				isNumeric = false;
+			} else if (!BakeryUtils.isNumeric(storeChose)){
+				System.out.println("Invalid input");
+				isNumeric = false;
+			} else if (Integer.parseInt(storeChose) < 1 || Integer.parseInt(storeChose) > 10){
+				System.out.println("Invalid input");
+				isNumeric = false;
+			}
+			if (!isNumeric){
+				System.out.println("Please enter again: ");
+				storeChose = sc.nextLine();
+			}
+		} while (!isNumeric);
+		for (Store store: bakery.getListOfStore()){
+			if (storeChose.equals(store.getStoreId())){
+				return store;
 			}
 		}
-		return false;
-	}
-
-	public ArrayList<String> readFile(String fileName) {
-		ArrayList<String> strings = new ArrayList<String>();
-		try {
-			FileReader inputFile = new FileReader(fileName);
-			try {
-				Scanner parser = new Scanner(inputFile);
-				parser.nextLine();
-				while (parser.hasNextLine()) {
-					String line = parser.nextLine();
-					if (line.isEmpty())
-						continue;
-					strings.add(line);
-				}
-			} finally {
-				inputFile.close();
-			}
-		} catch (FileNotFoundException e) {
-			System.out.println(fileName + " not found");
-		} catch (IOException e) {
-			System.out.println("Unexpected I/O exception occur");
-		}
-		return strings;
+		return new Store();
 	}
 
 }
