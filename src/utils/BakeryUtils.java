@@ -91,7 +91,12 @@ public class BakeryUtils {
         displayBakeShop();
         System.out.println("-- Please select one option by entering the number:");
         System.out.println("1. Print items low in inventory");
-        System.out.println("2. Print total number of items sold in last month");
+        System.out.println("2. Print total number of items sold in last month in each store");
+        System.out.println("3. Print total number of coffee sold in last month in each store");
+        System.out.println("4. Total number of coffee beans (in quantity) sold in last month in each store");
+        System.out.println("5. Type of coffee sold the most per store in the last month");
+        System.out.println("6. Days of the week that made the most sale in the last month per store");
+        System.out.println("7. Total sale made in dollars in the last month per store");
     }
 
     public static boolean isNumeric(String s) {
